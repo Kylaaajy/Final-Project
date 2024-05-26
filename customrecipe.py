@@ -46,11 +46,6 @@ def app():
 
     if st.session_state.step == 2:
         if st.button("Generate Recipe"):
-            st.session_state.step = 3
-            st.experimental_rerun()
-
-    if st.session_state.step == 3:
-        if 'recipe' not in st.session_state:
             dietary_restrictions = ", ".join(st.session_state.dietary_restrictions) if st.session_state.dietary_restrictions else "None"
             recipe = generate_recipe(
                 st.session_state.ingredients,
@@ -60,5 +55,19 @@ def app():
             )
             if recipe:
                 st.session_state.recipe = recipe
+                st.session_state.step = 3
                 st.experimental_rerun()
-  
+            else:
+                st.session_state.step = 1
+                st.experimental_rerun()
+
+    if st.session_state.step == 3:
+        st.write(f"Custom recipe based on your ingredients, cuisine preference, dietary restrictions, and cooking time: {st.session_state.recipe}")
+        if st.button("Start Over"):
+            for key in ['step', 'ingredients', 'cuisine', 'dietary_restrictions', 'cooking_time', 'recipe']:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.experimental_rerun()
+
+if __name__ == "__main__":
+    app()
