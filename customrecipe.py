@@ -20,7 +20,7 @@ def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
             temperature=0.7,
             max_tokens=150
         )
-        st.write(f"Response: {response}")  # Debug line to show the raw API response
+        st.write(f"API Response: {response}")  # Debug line to show the raw API response
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         st.error(f"Error generating recipe: {e}")
