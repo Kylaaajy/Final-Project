@@ -11,7 +11,7 @@ async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_ti
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
 
-    response = await openai.ChatCompletion.create(
+    response = await openai.ChatCompletion.acreate(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a Chef"},
@@ -34,10 +34,11 @@ def app():
         st.session_state.cooking_time = st.number_input("Maximum cooking time (minutes)", min_value=1, max_value=240, step=5)
         if st.button("Get Recipe"):
             st.session_state.step = 2
+            st.experimental_rerun()
 
     if st.session_state.step == 2:
         if st.button("Generate Recipe"):
-            st.session_state.step = 3  # Proceed to show the recipe
+            st.session_state.step = 3
             st.experimental_rerun()
 
     if st.session_state.step == 3:
@@ -52,6 +53,7 @@ def app():
                 st.session_state.recipe = recipe
                 st.experimental_rerun()
 
+            # Run the fetch_recipe coroutine
             asyncio.run(fetch_recipe())
         else:
             st.write(f"Custom recipe based on your ingredients, cuisine preference, dietary restrictions, and cooking time: {st.session_state.recipe}")
