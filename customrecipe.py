@@ -2,8 +2,9 @@ import streamlit as st
 import openai
 import asyncio
 
-# Initialize the OpenAI client
-openai.api_key = st.secrets["API_key"]
+from openai import AsyncOpenAI
+
+client = AsyncOpenAI(api_key=st.secrets["API_key"])
 
 async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
     prompt_text = (
@@ -11,7 +12,7 @@ async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_ti
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
 
-    response = await openai.ChatCompletion.acreate(
+    response = await client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a Chef"},
@@ -19,7 +20,7 @@ async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_ti
         ],
     )
 
-    return response.choices[0].message['content']
+    return response.choices[0].message.content
 
 def app():
     st.title("Custom Recipe Creator")
@@ -34,11 +35,10 @@ def app():
         st.session_state.cooking_time = st.number_input("Maximum cooking time (minutes)", min_value=1, max_value=240, step=5)
         if st.button("Get Recipe"):
             st.session_state.step = 2
-            st.experimental_rerun()
 
     if st.session_state.step == 2:
         if st.button("Generate Recipe"):
-            st.session_state.step = 3
+            st.session_state.step = 3  # Proceed to show the recipe
             st.experimental_rerun()
 
     if st.session_state.step == 3:
@@ -53,7 +53,6 @@ def app():
                 st.session_state.recipe = recipe
                 st.experimental_rerun()
 
-            # Run the fetch_recipe coroutine
             asyncio.run(fetch_recipe())
         else:
             st.write(f"Custom recipe based on your ingredients, cuisine preference, dietary restrictions, and cooking time: {st.session_state.recipe}")
@@ -63,5 +62,5 @@ def app():
                         del st.session_state[key]
                 st.experimental_rerun()
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     app()
