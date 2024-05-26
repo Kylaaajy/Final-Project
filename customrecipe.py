@@ -9,6 +9,7 @@ def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
         f"I have the following ingredients: {ingredients}. "
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
+    st.write(f"Prompt: {prompt_text}")  # Debug line to show the prompt
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4-turbo",
@@ -19,6 +20,7 @@ def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
             temperature=0.7,
             max_tokens=150
         )
+        st.write(f"Response: {response}")  # Debug line to show the raw API response
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         st.error(f"Error generating recipe: {e}")
@@ -29,6 +31,8 @@ def app():
 
     if 'step' not in st.session_state:
         st.session_state.step = 1
+
+    st.write(f"Current Step: {st.session_state.step}")  # Debug line to show the current step
 
     if st.session_state.step == 1:
         ingredients = st.text_input("Enter the ingredients you have (comma-separated)")
