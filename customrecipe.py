@@ -2,7 +2,8 @@ import streamlit as st
 import openai
 import asyncio
 
-# Set your OpenAI API key
+pip install openai
+
 openai.api_key = st.secrets["API_key"]
 
 async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
