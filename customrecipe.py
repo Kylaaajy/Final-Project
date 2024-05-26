@@ -10,14 +10,17 @@ def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
 
-    response = openai.Completion.create(
-        engine="davinci",
-        prompt=prompt_text,
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt_text},
+        ],
         temperature=0.7,
         max_tokens=150
     )
 
-    return response.choices[0].text.strip()
+    return response['choices'][0]['message']['content'].strip()
 
 def app():
     st.title("Custom Recipe Creator")
@@ -34,7 +37,7 @@ def app():
         dietary_options = ["None", "Vegetarian", "Vegan", "Gluten-Free", "Keto", "Paleo", "Low-Carb", "Low-Fat", "Dairy-Free", "Nut-Free", "Halal", "Kosher"]
         st.session_state.dietary_restrictions = st.multiselect("Any dietary restrictions?", dietary_options)
         
-        st.session_state.cooking_time = st.number_input("Maximum cooking time (minutes)", min_value=1, max_value=240, step=5)
+        st.session_state.cooking_time = st.number_input("Maximum cooking time (minutes)", min_value=10, max_value=240, step=5)
         if st.button("Get Recipe"):
             st.session_state.step = 2
             st.experimental_rerun()
