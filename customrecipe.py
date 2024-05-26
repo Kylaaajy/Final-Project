@@ -2,8 +2,7 @@ import streamlit as st
 import openai
 import asyncio
 
-from openai.api_resources.completion import Completion
-
+# Set your OpenAI API key
 openai.api_key = st.secrets["API_key"]
 
 async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
@@ -12,15 +11,14 @@ async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_ti
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
 
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        messages=[
-            {"role": "system", "content": "You are a Chef"},
-            {"role": "user", "content": prompt_text}
-        ],
+    response = await openai.Completion.create(
+        engine="davinci",
+        prompt=prompt_text,
+        temperature=0.7,
+        max_tokens=150
     )
 
-    return response.choices[0].message['content']
+    return response.choices[0].text.strip()
 
 def app():
     st.title("Custom Recipe Creator")
