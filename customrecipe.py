@@ -1,17 +1,19 @@
 import streamlit as st
 import openai
+import asyncio
+from openai import AsyncOpenAI
 
 # Ensure your OpenAI API key is set in the Streamlit secrets
 openai.api_key = st.secrets["API_key"]
 
-def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
+async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
     prompt_text = (
         f"I have the following ingredients: {ingredients}. "
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
     st.write(f"Prompt: {prompt_text}")  # Debug line to show the prompt
     try:
-        response = openai.ChatCompletion.create(
+        response = await AsyncOpenAI.create(
             model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
@@ -21,7 +23,9 @@ def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
             max_tokens=150
         )
         st.write(f"API Response: {response}")  # Debug line to show the raw API response
-        return response['choices'][0]['message']['content'].strip()
+        recipe = response['choices'][0]['message']['content'].strip()
+        st.write(f"Generated Recipe: {recipe}")  # Debug line to show the recipe
+        return recipe
     except Exception as e:
         st.error(f"Error generating recipe: {e}")
         return None
@@ -52,12 +56,16 @@ def app():
 
     if st.session_state.step == 2:
         dietary_restrictions = ", ".join(st.session_state.dietary_restrictions) if st.session_state.dietary_restrictions else "None"
-        recipe = generate_recipe(
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        recipe = loop.run_until_complete(generate_recipe(
             st.session_state.ingredients,
             st.session_state.cuisine,
             dietary_restrictions,
             st.session_state.cooking_time
-        )
+        ))
+        
         if recipe:
             st.session_state.recipe = recipe
             st.session_state.step = 3
