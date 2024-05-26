@@ -11,7 +11,7 @@ def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
     )
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt_text},
@@ -61,13 +61,4 @@ def app():
             if recipe:
                 st.session_state.recipe = recipe
                 st.experimental_rerun()
-        else:
-            st.write(f"Custom recipe based on your ingredients, cuisine preference, dietary restrictions, and cooking time: {st.session_state.recipe}")
-            if st.button("Start Over"):
-                for key in ['step', 'ingredients', 'cuisine', 'dietary_restrictions', 'cooking_time', 'recipe']:
-                    if key in st.session_state:
-                        del st.session_state[key]
-                st.experimental_rerun()
-
-if __name__ == "__main__":
-    app()
+  
