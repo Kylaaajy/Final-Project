@@ -27,8 +27,13 @@ def app():
 
     if st.session_state.step == 1:
         st.session_state.ingredients = st.text_input("Enter the ingredients you have (comma-separated)")
-        st.session_state.cuisine = st.selectbox("Select cuisine type", ["Italian", "Mexican", "Asian", "Mediterranean", "Other"])
-        st.session_state.dietary_restrictions = st.text_input("Any dietary restrictions?")
+        
+        cuisine_options = ["Italian", "Mexican", "Asian", "Mediterranean", "American", "Indian", "French", "Japanese", "Chinese", "Thai", "Spanish", "Greek", "Middle Eastern", "Caribbean", "African"]
+        st.session_state.cuisine = st.selectbox("Select cuisine type", cuisine_options)
+        
+        dietary_options = ["None", "Vegetarian", "Vegan", "Gluten-Free", "Keto", "Paleo", "Low-Carb", "Low-Fat", "Dairy-Free", "Nut-Free", "Halal", "Kosher"]
+        st.session_state.dietary_restrictions = st.multiselect("Any dietary restrictions?", dietary_options)
+        
         st.session_state.cooking_time = st.number_input("Maximum cooking time (minutes)", min_value=1, max_value=240, step=5)
         if st.button("Get Recipe"):
             st.session_state.step = 2
@@ -41,10 +46,11 @@ def app():
 
     if st.session_state.step == 3:
         if 'recipe' not in st.session_state:
+            dietary_restrictions = ", ".join(st.session_state.dietary_restrictions) if st.session_state.dietary_restrictions else "None"
             recipe = generate_recipe(
                 st.session_state.ingredients,
                 st.session_state.cuisine,
-                st.session_state.dietary_restrictions,
+                dietary_restrictions,
                 st.session_state.cooking_time
             )
             st.session_state.recipe = recipe
