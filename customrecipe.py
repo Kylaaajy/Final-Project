@@ -1,16 +1,15 @@
 import streamlit as st
 import openai
-import asyncio
 
 openai.api_key = st.secrets["API_key"]
 
-async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
+def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
     prompt_text = (
         f"I have the following ingredients: {ingredients}. "
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
 
-    response = await openai.Completion.create(
+    response = openai.Completion.create(
         engine="davinci",
         prompt=prompt_text,
         temperature=0.7,
@@ -40,17 +39,14 @@ def app():
 
     if st.session_state.step == 3:
         if 'recipe' not in st.session_state:
-            async def fetch_recipe():
-                recipe = await generate_recipe(
-                    st.session_state.ingredients,
-                    st.session_state.cuisine,
-                    st.session_state.dietary_restrictions,
-                    st.session_state.cooking_time
-                )
-                st.session_state.recipe = recipe
-                st.experimental_rerun()
-
-            asyncio.run(fetch_recipe())
+            recipe = generate_recipe(
+                st.session_state.ingredients,
+                st.session_state.cuisine,
+                st.session_state.dietary_restrictions,
+                st.session_state.cooking_time
+            )
+            st.session_state.recipe = recipe
+            st.experimental_rerun()
         else:
             st.write(f"Custom recipe based on your ingredients, cuisine preference, dietary restrictions, and cooking time: {st.session_state.recipe}")
             if st.button("Start Over"):
