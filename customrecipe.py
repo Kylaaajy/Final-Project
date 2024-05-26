@@ -2,9 +2,8 @@ import streamlit as st
 import openai
 import asyncio
 
-from openai import AsyncOpenAI
-
-client = AsyncOpenAI(api_key=st.secrets["API_key"])
+# Initialize the OpenAI client
+openai.api_key = st.secrets["API_key"]
 
 async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
     prompt_text = (
@@ -12,7 +11,7 @@ async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_ti
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
 
-    response = await client.chat.completions.create(
+    response = await openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a Chef"},
@@ -20,7 +19,7 @@ async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_ti
         ],
     )
 
-    return response.choices[0].message.content
+    return response.choices[0].message['content']
 
 def app():
     st.title("Custom Recipe Creator")
