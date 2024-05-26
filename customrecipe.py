@@ -31,38 +31,38 @@ def app():
         st.session_state.step = 1
 
     if st.session_state.step == 1:
-        st.session_state.ingredients = st.text_input("Enter the ingredients you have (comma-separated)")
-        
+        ingredients = st.text_input("Enter the ingredients you have (comma-separated)")
         cuisine_options = ["Italian", "Mexican", "Asian", "Mediterranean", "American", "Indian", "French", "Japanese", "Chinese", "Thai", "Spanish", "Greek", "Middle Eastern", "Caribbean", "African"]
-        st.session_state.cuisine = st.selectbox("Select cuisine type", cuisine_options)
-        
+        cuisine = st.selectbox("Select cuisine type", cuisine_options)
         dietary_options = ["None", "Vegetarian", "Vegan", "Gluten-Free", "Keto", "Paleo", "Low-Carb", "Low-Fat", "Dairy-Free", "Nut-Free", "Halal", "Kosher"]
-        st.session_state.dietary_restrictions = st.multiselect("Any dietary restrictions?", dietary_options)
+        dietary_restrictions = st.multiselect("Any dietary restrictions?", dietary_options)
+        cooking_time = st.number_input("Maximum cooking time (minutes)", min_value=10, max_value=240, step=5)
         
-        st.session_state.cooking_time = st.number_input("Maximum cooking time (minutes)", min_value=10, max_value=240, step=5)
         if st.button("Get Recipe"):
+            st.session_state.ingredients = ingredients
+            st.session_state.cuisine = cuisine
+            st.session_state.dietary_restrictions = dietary_restrictions
+            st.session_state.cooking_time = cooking_time
             st.session_state.step = 2
             st.experimental_rerun()
 
     if st.session_state.step == 2:
-        if st.button("Generate Recipe"):
-            dietary_restrictions = ", ".join(st.session_state.dietary_restrictions) if st.session_state.dietary_restrictions else "None"
-            recipe = generate_recipe(
-                st.session_state.ingredients,
-                st.session_state.cuisine,
-                dietary_restrictions,
-                st.session_state.cooking_time
-            )
-            if recipe:
-                st.session_state.recipe = recipe
-                st.session_state.step = 3
-                st.experimental_rerun()
-            else:
-                st.session_state.step = 1
-                st.experimental_rerun()
+        dietary_restrictions = ", ".join(st.session_state.dietary_restrictions) if st.session_state.dietary_restrictions else "None"
+        recipe = generate_recipe(
+            st.session_state.ingredients,
+            st.session_state.cuisine,
+            dietary_restrictions,
+            st.session_state.cooking_time
+        )
+        if recipe:
+            st.session_state.recipe = recipe
+            st.session_state.step = 3
+        else:
+            st.session_state.step = 1
+        st.experimental_rerun()
 
     if st.session_state.step == 3:
-        st.write(f"Custom recipe based on your ingredients, cuisine preference, dietary restrictions, and cooking time: {st.session_state.recipe}")
+        st.write(f"Custom recipe based on your ingredients, cuisine preference, dietary restrictions, and cooking time:\n\n{st.session_state.recipe}")
         if st.button("Start Over"):
             for key in ['step', 'ingredients', 'cuisine', 'dietary_restrictions', 'cooking_time', 'recipe']:
                 if key in st.session_state:
