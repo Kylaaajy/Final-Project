@@ -1,6 +1,7 @@
 import streamlit as st
 import openai
 
+# Ensure your OpenAI API key is set in the Streamlit secrets
 openai.api_key = st.secrets["API_key"]
 
 def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
