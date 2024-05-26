@@ -1,43 +1,61 @@
 import streamlit as st
 import openai
-from streamlit.report_thread import async_to_sync
-import asyncio
 
-from openai import AsyncOpenAI
+# Ensure your OpenAI API key is set in the Streamlit secrets
+openai.api_key = st.secrets["API_key"]
 
-@@ -37,23 +37,27 @@ def app():
-    if st.session_state.step == 2:
-        if st.button("Get Travel Recommendation"):
-            st.session_state.step = 3  # Proceed to show the recommendation
+def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
+    prompt_text = (
+        f"I have the following ingredients: {ingredients}. "
+        f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
+    )
+
+    response = openai.Completion.create(
+        engine="davinci",
+        prompt=prompt_text,
+        temperature=0.7,
+        max_tokens=150
+    )
+
+    return response.choices[0].text.strip()
+
+def app():
+    st.title("Custom Recipe Creator")
+
+    if 'step' not in st.session_state:
+        st.session_state.step = 1
+
+    if st.session_state.step == 1:
+        st.session_state.ingredients = st.text_input("Enter the ingredients you have (comma-separated)")
+        st.session_state.cuisine = st.selectbox("Select cuisine type", ["Italian", "Mexican", "Asian", "Mediterranean", "Other"])
+        st.session_state.dietary_restrictions = st.text_input("Any dietary restrictions?")
+        st.session_state.cooking_time = st.number_input("Maximum cooking time (minutes)", min_value=1, max_value=240, step=5)
+        if st.button("Get Recipe"):
+            st.session_state.step = 2
             st.experimental_rerun()
-            st.rerun()
+
+    if st.session_state.step == 2:
+        if st.button("Generate Recipe"):
+            st.session_state.step = 3
+            st.experimental_rerun()
 
     if st.session_state.step == 3:
-        if 'itinerary' not in st.session_state:
-            itinerary = async_to_sync(generate_travel_recommendation)(
-                st.session_state.destination,
-                st.session_state.duration,
-                st.session_state.interests
+        if 'recipe' not in st.session_state:
+            recipe = generate_recipe(
+                st.session_state.ingredients,
+                st.session_state.cuisine,
+                st.session_state.dietary_restrictions,
+                st.session_state.cooking_time
             )
-            st.session_state.itinerary = itinerary
-            async def fetch_itinerary():
-                itinerary = await generate_travel_recommendation(
-                    st.session_state.destination,
-                    st.session_state.duration,
-                    st.session_state.interests
-                )
-                st.session_state.itinerary = itinerary
-                st.rerun()
-
-            asyncio.run(fetch_itinerary())
+            st.session_state.recipe = recipe
+            st.experimental_rerun()
         else:
-            st.write(f"Recommended itinerary for your trip to {st.session_state.destination} for {st.session_state.duration} days, focusing on {st.session_state.interests}, is: {st.session_state.itinerary}")
+            st.write(f"Custom recipe based on your ingredients, cuisine preference, dietary restrictions, and cooking time: {st.session_state.recipe}")
             if st.button("Start Over"):
-                for key in ['step', 'destination', 'duration', 'interests', 'itinerary']:
+                for key in ['step', 'ingredients', 'cuisine', 'dietary_restrictions', 'cooking_time', 'recipe']:
                     if key in st.session_state:
                         del st.session_state[key]
                 st.experimental_rerun()
-                st.rerun()
 
 if __name__ == "__main__":
     app()
