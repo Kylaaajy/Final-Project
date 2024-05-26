@@ -2,9 +2,9 @@ import streamlit as st
 import openai
 import asyncio
 
-from openai import AsyncOpenAI
+from openai.api_resources.completion import Completion
 
-client = AsyncOpenAI(api_key=st.secrets["API_key"])
+openai.api_key = st.secrets["API_key"]
 
 async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_time):
     prompt_text = (
@@ -12,15 +12,15 @@ async def generate_recipe(ingredients, cuisine, dietary_restrictions, cooking_ti
         f"I want to make a {cuisine} dish that fits my dietary restrictions ({dietary_restrictions}) and can be prepared in {cooking_time} minutes."
     )
 
-    response = await client.chat.completions.create(
-        model="gpt-3.5-turbo",
+    response = openai.Completion.create(
+        model="text-davinci-003",
         messages=[
             {"role": "system", "content": "You are a Chef"},
             {"role": "user", "content": prompt_text}
         ],
     )
 
-    return response.choices[0].message.content
+    return response.choices[0].message['content']
 
 def app():
     st.title("Custom Recipe Creator")
@@ -62,5 +62,5 @@ def app():
                         del st.session_state[key]
                 st.experimental_rerun()
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     app()
